@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=1.5">
+    <title>mani.net</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #030303; --card: #0b0b0b; --border: #1a1a1a; --border-hover: #2e2e2e;
+            --text: #b0b0b0; --text-bright: #f5f5f5; --text-secondary: #666; --text-tertiary: #444;
+            --accent: #fff; --divider-color: #222; --image-brightness: 0.8; --image-hover-brightness: 0.9;
+            --star-opacity: 0.7; --music-btn-bg: rgba(20,20,20,0.85); --music-btn-color: #ccc;
+            --music-btn-border: rgba(255,255,255,0.1); --music-btn-hover-bg: rgba(30,30,30,0.9);
+            --music-btn-hover-color: #fff; --nav-bg: rgba(10,10,10,0.8);
+            --post-bg: #0b0b0b; --post-border: #1a1a1a; --post-hover-border: #2a2a2a;
+            --tag-bg: #111; --tag-color: #888; --tag-border: #1f1f1f;
+            --lightbox-bg: rgba(0,0,0,0.95); --file-bg: #0f0f0f; --file-border: #1f1f1f; --file-hover: #1a1a1a;
+            --forum-avatar-bg: #1a1a1a; --btn-bg: #fff; --btn-color: #000; --btn-hover: #e5e5e5;
+        }
+
+        body.light {
+            --bg: #f5f5f5; --card: #ffffff; --border: #e0e0e0; --border-hover: #c0c0c0;
+            --text: #666; --text-bright: #111; --text-secondary: #999; --text-tertiary: #aaa; --accent: #000;
+            --divider-color: #ddd; --image-brightness: 1; --image-hover-brightness: 1.05; --star-opacity: 0.4;
+            --music-btn-bg: rgba(255,255,255,0.85); --music-btn-color: #555; --music-btn-border: rgba(0,0,0,0.1);
+            --music-btn-hover-bg: rgba(255,255,255,0.95); --music-btn-hover-color: #000;
+            --nav-bg: rgba(255,255,255,0.8); --post-bg: #ffffff; --post-border: #e0e0e0;
+            --post-hover-border: #c0c0c0; --tag-bg: #f0f0f0; --tag-color: #888; --tag-border: #ddd;
+            --lightbox-bg: rgba(255,255,255,0.95); --file-bg: #f8f8f8; --file-border: #e0e0e0; --file-hover: #eee;
+            --forum-avatar-bg: #e8e8e8; --btn-bg: #000; --btn-color: #fff; --btn-hover: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 1rem; margin: 0; position: relative; overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent; transition: background 0.5s ease;
+        }
+
+        body::before {
+            content: ""; position: fixed; inset: 0;
+            background: radial-gradient(ellipse at 20% 20%, rgba(128,128,128,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 75%, rgba(100,100,100,0.08) 0%, transparent 60%),
+                        radial-gradient(ellipse at 50% 50%, rgba(128,128,128,0.01) 0%, transparent 70%);
+            pointer-events: none; z-index: 0; animation: ambientPulse 8s ease-in-out infinite alternate;
+        }
+        @keyframes ambientPulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        body::after {
+            content: ""; position: fixed; inset: 0;
+            background-image: linear-gradient(rgba(128,128,128,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(128,128,128,0.04) 1px, transparent 1px);
+            background-size: 40px 40px; pointer-events: none; z-index: 0;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+        }
+
+        .theme-toggle {
+            position: fixed; top: 1.5rem; right: 1.5rem; z-index: 200;
+            background: var(--card); border: 1px solid var(--border); border-radius: 50%;
+            width: 2.8rem; height: 2.8rem; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text); font-size: 1.2rem; transition: all 0.3s ease;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .theme-toggle:hover { transform: scale(1.1); border-color: var(--border-hover); }
+
+        .stars { position: fixed; inset: 0; pointer-events: none; z-index: 99; overflow: hidden; }
+        .star { position: absolute; background: var(--accent); border-radius: 50%; animation: twinkle ease-in-out infinite; opacity: 0; }
+        @keyframes twinkle {
+            0%,100% { opacity: 0; transform: scale(0.5); }
+            30% { opacity: var(--star-opacity); transform: scale(1); }
+            50% { opacity: var(--star-opacity); transform: scale(1.3); }
+            70% { opacity: var(--star-opacity); transform: scale(1); }
+        }
+        .star-glow { position: absolute; background: var(--accent); border-radius: 50%; filter: blur(3px); animation: glowPulse ease-in-out infinite; opacity: 0; }
+        @keyframes glowPulse {
+            0%,100% { opacity: 0; transform: scale(0.5); }
+            40% { opacity: 0.15; transform: scale(1.5); }
+            60% { opacity: 0.1; transform: scale(1.8); }
+        }
+
+        .app-container {
+            position: relative; z-index: 2; width: 100%; max-width: 600px;
+            display: flex; flex-direction: column; gap: 1rem;
+            opacity: 0; transform: translateY(20px);
+            animation: entry 0.8s cubic-bezier(0.22,0.61,0.36,1) forwards;
+        }
+        @keyframes entry { to { opacity: 1; transform: translateY(0); } }
+
+        .nav-tabs {
+            display: flex; background: var(--nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border); border-radius: 3rem; padding: 0.3rem; gap: 0.2rem;
+            position: sticky; top: 1rem; z-index: 150;
+        }
+        .nav-tab {
+            flex: 1; padding: 0.7rem 0.5rem; border-radius: 3rem; border: none; background: transparent;
+            color: var(--text-secondary); font-weight: 600; font-size: 0.8rem; cursor: pointer;
+            transition: all 0.3s ease; letter-spacing: 0.2px; display: flex; align-items: center;
+            justify-content: center; gap: 0.3rem; white-space: nowrap;
+        }
+        .nav-tab i { font-size: 0.9rem; }
+        .nav-tab.active { background: var(--btn-bg); color: var(--btn-color); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+
+        .page { display: none; flex-direction: column; gap: 1rem; animation: fadeSlide 0.4s ease; }
+        .page.active { display: flex; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 2rem;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(128,128,128,0.02) inset;
+            overflow: hidden; transition: all 0.4s ease; color: var(--text);
+        }
+        .card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+
+        .image-container { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; background: #060606; border-bottom: 1px solid var(--border); }
+        .image-container img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+            filter: grayscale(50%) contrast(1.15) brightness(var(--image-brightness));
+            transition: all 0.8s cubic-bezier(0.22,0.61,0.36,1);
+        }
+        .card:hover .image-container img { filter: grayscale(10%) contrast(1.2) brightness(var(--image-hover-brightness)); transform: scale(1.05); }
+        .image-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.4) 80%, rgba(0,0,0,0.85) 100%); pointer-events: none; z-index: 2; }
+        .image-glare { position: absolute; top: -30%; left: -30%; width: 60%; height: 100%; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.03) 45%, transparent 50%); transform: rotate(25deg); pointer-events: none; z-index: 3; transition: left 0.8s; }
+        .card:hover .image-glare { left: 120%; }
+
+        .content { padding: 1.8rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.7rem; }
+        .badge { display: inline-flex; align-items: center; gap: 0.35rem; background: #111; border: 1px solid #222; border-radius: 4rem; padding: 0.3rem 1.1rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.8px; color: #777; text-transform: uppercase; }
+        .badge-dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; animation: dotPulse 2s ease-in-out infinite; }
+        @keyframes dotPulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+        h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.4px; color: var(--text-bright); }
+        .divider { width: 40px; height: 1px; background: linear-gradient(90deg, transparent, var(--divider-color), transparent); }
+
+        .btn-edit {
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            background: #1a1a1a; color: #fff; border: 1px solid #333;
+            border-radius: 3rem; padding: 0.9rem 1.5rem;
+            width: 100%; font-weight: 700; font-size: 1rem; cursor: pointer;
+            transition: all 0.3s; text-decoration: none;
+        }
+        .btn-edit:hover { background: #252525; border-color: #555; transform: translateY(-2px); }
+        .btn-edit i { font-size: 1.1rem; }
+
+        .order-form { display: none; flex-direction: column; gap: 0.8rem; }
+        .order-form.active { display: flex; }
+        .form-label { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .type-options { display: flex; gap: 0.5rem; }
+        .type-option {
+            flex: 1; padding: 0.7rem; border-radius: 1.5rem; background: var(--card);
+            border: 2px solid var(--border); color: var(--text); text-align: center;
+            cursor: pointer; transition: all 0.3s; font-weight: 600; font-size: 0.85rem;
+        }
+        .type-option.selected { border-color: var(--accent); color: #fff; background: rgba(255,255,255,0.05); }
+        .submit-btn {
+            background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 3rem;
+            padding: 0.9rem; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .submit-btn:hover { background: #252525; border-color: #555; transform: translateY(-1px); }
+        .back-btn {
+            background: transparent; border: 1px solid var(--border); border-radius: 3rem;
+            padding: 0.6rem; color: var(--text); cursor: pointer; font-size: 0.8rem; font-weight: 600;
+        }
+        .back-btn:hover { border-color: var(--border-hover); }
+
+        .forum-section-title {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.5px; padding: 0 0.3rem;
+        }
+        .filter-bar { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+        .filter-tag {
+            font-size: 0.7rem; padding: 0.35rem 0.9rem; border-radius: 2rem;
+            background: var(--tag-bg); color: var(--tag-color); border: 1px solid var(--tag-border);
+            cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px; font-weight: 500;
+        }
+        .filter-tag:hover, .filter-tag.active { background: var(--btn-bg); color: var(--btn-color); border-color: var(--btn-bg); }
+        .filter-reset {
+            font-size: 0.7rem; padding: 0.35rem 0.9rem; border-radius: 2rem;
+            background: transparent; color: var(--text-secondary); border: 1px solid var(--border);
+            cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px; font-weight: 500;
+            display: none; align-items: center; gap: 0.3rem;
+        }
+        .filter-reset.visible { display: inline-flex; }
+
+        .topics-container { display: flex; flex-direction: column; gap: 0.8rem; }
+        .topic-card { background: var(--post-bg); border: 1px solid var(--post-border); border-radius: 1.5rem; overflow: hidden; transition: all 0.3s ease; }
+        .topic-card:hover { border-color: var(--post-hover-border); transform: translateY(-2px); }
+        .topic-header { display: flex; align-items: center; gap: 0.7rem; padding: 1rem 1.3rem; border-bottom: 1px solid var(--border); }
+        .topic-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--forum-avatar-bg); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: var(--text-bright); border: 1px solid var(--border); flex-shrink: 0; }
+        .topic-user-info { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+        .topic-username { font-weight: 600; font-size: 0.85rem; color: var(--text-bright); }
+        .topic-meta { font-size: 0.65rem; color: var(--text-tertiary); display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .topic-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.6rem; padding: 0.2rem 0.6rem; border-radius: 2rem; background: var(--tag-bg); color: var(--tag-color); border: 1px solid var(--tag-border); letter-spacing: 0.3px; }
+        .topic-body { padding: 1rem 1.3rem 1.2rem; display: flex; flex-direction: column; gap: 0.6rem; }
+        .topic-image { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #0a0a0a; cursor: pointer; border-radius: 0.8rem; transition: filter 0.3s; }
+        .topic-image:hover { filter: brightness(1.1); }
+        .topic-video { width: 100%; aspect-ratio: 16/9; display: block; background: #000; border: none; outline: none; border-radius: 0.8rem; }
+        .topic-text { font-size: 0.9rem; color: var(--text); line-height: 1.6; }
+        .file-attachments { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.2rem; }
+        .file-item { display: flex; align-items: center; gap: 0.5rem; background: var(--file-bg); border: 1px solid var(--file-border); border-radius: 2rem; padding: 0.4rem 0.9rem; text-decoration: none; transition: all 0.25s; cursor: pointer; font-size: 0.75rem; color: var(--text); font-weight: 500; }
+        .file-item:hover { background: var(--file-hover); border-color: var(--border-hover); }
+        .file-item i { font-size: 0.9rem; }
+
+        .music-fab {
+            position: fixed; bottom: 1.8rem; right: 1.8rem; z-index: 300;
+            background: var(--music-btn-bg); border: 1px solid var(--music-btn-border); border-radius: 50%;
+            width: 3.2rem; height: 3.2rem; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--music-btn-color); font-size: 1.3rem;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); transition: all 0.3s ease;
+        }
+        .music-fab:hover { background: var(--music-btn-hover-bg); color: var(--music-btn-hover-color); transform: scale(1.1); }
+        .music-fab.playing { animation: fabGlow 2s ease-in-out infinite; }
+        @keyframes fabGlow { 0%,100% { box-shadow: 0 8px 25px rgba(0,0,0,0.3); } 50% { box-shadow: 0 8px 35px rgba(128,128,128,0.15), 0 0 0 8px rgba(128,128,128,0.03); } }
+
+        .lightbox {
+            position: fixed; inset: 0; z-index: 9999; background: var(--lightbox-bg);
+            display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .lightbox.active { display: flex; opacity: 1; }
+        .lightbox-close {
+            position: absolute; top: 1.5rem; right: 1.5rem; z-index: 10;
+            width: 3rem; height: 3rem; border-radius: 50%; background: rgba(128,128,128,0.15);
+            border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 1.3rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .lightbox-image-wrap { max-width: 90vw; max-height: 90vh; overflow: hidden; cursor: grab; display: flex; align-items: center; justify-content: center; }
+        .lightbox-image { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 0.5rem; user-select: none; -webkit-user-drag: none; }
+        .lightbox-controls {
+            position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 0.8rem; background: rgba(0,0,0,0.6); backdrop-filter: blur(12px);
+            border-radius: 3rem; padding: 0.5rem 1rem; border: 1px solid rgba(255,255,255,0.1); z-index: 10;
+        }
+        .lightbox-control-btn {
+            background: transparent; border: none; color: #fff; font-size: 1.2rem;
+            cursor: pointer; width: 2.2rem; height: 2.2rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        @media (max-width: 450px) {
+            .content { padding: 1.4rem 1.2rem; }
+            .topic-body { padding: 1rem; }
+            .topic-header { padding: 0.8rem 1rem; }
+            h1 { font-size: 1.6rem; }
+            .nav-tab { font-size: 0.7rem; padding: 0.6rem 0.35rem; }
+            .theme-toggle { top: 1rem; right: 1rem; width: 2.4rem; height: 2.4rem; font-size: 1rem; }
+            .music-fab { bottom: 1.2rem; right: 1.2rem; width: 2.8rem; height: 2.8rem; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Тема"><i class="ri-sun-line" id="themeIcon"></i></button>
+    <button class="music-fab" id="musicFab" aria-label="Музыка"><i class="ri-play-fill" id="fabIcon"></i></button>
+    <div class="stars" id="starsContainer"></div>
+
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose"><i class="ri-close-line"></i></button>
+        <div class="lightbox-image-wrap" id="lightboxImageWrap">
+            <img class="lightbox-image" id="lightboxImage" src="" alt="Lightbox" draggable="false">
+        </div>
+        <div class="lightbox-controls">
+            <button class="lightbox-control-btn" id="zoomOut"><i class="ri-zoom-out-line"></i></button>
+            <button class="lightbox-control-btn" id="zoomReset"><i class="ri-fullscreen-line"></i></button>
+            <button class="lightbox-control-btn" id="zoomIn"><i class="ri-zoom-in-line"></i></button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-page="edits"><i class="ri-sparkling-2-line"></i> Эдиты</button>
+            <button class="nav-tab" data-page="forum"><i class="ri-chat-1-line"></i> Форум</button>
+        </nav>
+
+        <div class="page active" id="page-edits">
+            <div class="card">
+                <div class="image-container">
+                    <img src="img/preview.jpg" alt="Preview" loading="eager"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%221600%22 height=%22900%22%3E%3Crect fill=%22%23111%22 width=%221600%22 height=%22900%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 fill=%22%23555%22 font-size=%2230%22%3Epreview 16:9%3C/text%3E%3C/svg%3E';">
+                    <div class="image-overlay"></div>
+                    <div class="image-glare"></div>
+                </div>
+                <div class="content">
+                    <div class="badge"><span class="badge-dot"></span> эдиты на заказ <span class="badge-dot"></span></div>
+                    <h1>mani edits</h1>
+                    <div class="divider"></div>
+                    <div id="editMainView">
+                        <button class="btn-edit" id="orderBtn"><i class="ri-sparkling-2-line"></i> Заказать эдит</button>
+                    </div>
+                    <div class="order-form" id="orderForm">
+                        <div class="form-label">Тип эдита</div>
+                        <div class="type-options">
+                            <div class="type-option" data-type="Хардкор">Хардкор</div>
+                            <div class="type-option" data-type="Слабый">Слабый</div>
+                        </div>
+                        <button class="submit-btn" id="submitBtn">Отправить заявку</button>
+                        <button class="back-btn" id="backBtn">← Назад</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="page-forum">
+            <div class="forum-section-title"><i class="ri-chat-1-line"></i> Темы обсуждений</div>
+            <div class="filter-bar" id="filterBar"></div>
+            <div class="topics-container" id="topicsContainer"></div>
+        </div>
+    </div>
+
+    <audio id="bgAudio" preload="auto" loop><source src="musik/davni.mp3" type="audio/mpeg"></audio>
+
+    <script>
+    (function() {
+        const audio = document.getElementById('bgAudio');
+        const musicFab = document.getElementById('musicFab');
+        const fabIcon = document.getElementById('fabIcon');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const starsContainer = document.getElementById('starsContainer');
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const pages = document.querySelectorAll('.page');
+        const topicsContainer = document.getElementById('topicsContainer');
+        const filterBar = document.getElementById('filterBar');
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const lightboxImageWrap = document.getElementById('lightboxImageWrap');
+        const lightboxClose = document.getElementById('lightboxClose');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomResetBtn = document.getElementById('zoomReset');
+
+        const editMainView = document.getElementById('editMainView');
+        const orderForm = document.getElementById('orderForm');
+        const orderBtn = document.getElementById('orderBtn');
+        const backBtn = document.getElementById('backBtn');
+        const typeOptions = document.querySelectorAll('.type-option');
+        const submitBtn = document.getElementById('submitBtn');
+
+        const TARGET_USER = 'Davny';
+
+        let userInteracted = false;
+        let isDark = true;
+        let selectedType = null;
+        let allTopics = [];
+        let activeFilter = null;
+        let currentScale = 1;
+        let isDragging = false;
+        let startX, startY, translateX = 0, translateY = 0;
+
+        function applyImageTransform() { lightboxImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`; }
+        function resetZoom() { currentScale = 1; translateX = 0; translateY = 0; applyImageTransform(); lightboxImageWrap.style.cursor = 'grab'; }
+        function openLightbox(src) { lightboxImage.src = src; resetZoom(); lightbox.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeLightbox() { lightbox.classList.remove('active'); document.body.style.overflow = ''; resetZoom(); }
+
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+        zoomInBtn.addEventListener('click', () => { currentScale = Math.min(currentScale + 0.5, 5); applyImageTransform(); });
+        zoomOutBtn.addEventListener('click', () => { currentScale = Math.max(currentScale - 0.5, 0.5); if (currentScale <= 1) { translateX = 0; translateY = 0; } applyImageTransform(); });
+        zoomResetBtn.addEventListener('click', resetZoom);
+
+        lightboxImageWrap.addEventListener('mousedown', (e) => { if (currentScale > 1) { isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; lightboxImageWrap.style.cursor = 'grabbing'; e.preventDefault(); } });
+        window.addEventListener('mousemove', (e) => { if (!isDragging) return; translateX = e.clientX - startX; translateY = e.clientY - startY; applyImageTransform(); });
+        window.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; lightboxImageWrap.style.cursor = currentScale > 1 ? 'grab' : 'zoom-out'; } });
+        lightboxImageWrap.addEventListener('wheel', (e) => { e.preventDefault(); const delta = e.deltaY > 0 ? -0.3 : 0.3; currentScale = Math.min(Math.max(currentScale + delta, 0.5), 5); if (currentScale <= 1) { translateX = 0; translateY = 0; } applyImageTransform(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox(); });
+
+        typeOptions.forEach(opt => {
+            opt.addEventListener('click', () => { typeOptions.forEach(o => o.classList.remove('selected')); opt.classList.add('selected'); selectedType = opt.dataset.type; });
+        });
+
+        orderBtn.addEventListener('click', () => { editMainView.style.display = 'none'; orderForm.classList.add('active'); });
+        backBtn.addEventListener('click', () => { orderForm.classList.remove('active'); editMainView.style.display = 'block'; });
+
+        submitBtn.addEventListener('click', () => {
+            if (!selectedType) { alert('Выбери тип эдита'); return; }
+            const message = `Привет! Хочу заказать эдит: ${selectedType}`;
+            const tgUrl = `https://t.me/${TARGET_USER}?text=${encodeURIComponent(message)}`;
+            window.open(tgUrl, '_blank');
+        });
+
+        function renderFileAttachments(files) {
+            if (!files || !files.length) return '';
+            return `<div class="file-attachments">${files.map(file => {
+                const fileName = file.split('/').pop(); const ext = fileName.split('.').pop().toLowerCase();
+                let icon = 'ri-file-line';
+                if (ext==='pdf') icon='ri-file-pdf-line'; else if (['zip','rar','7z'].includes(ext)) icon='ri-file-zip-line';
+                else if (['jpg','jpeg','png','gif','webp'].includes(ext)) icon='ri-image-line';
+                else if (['mp4','webm'].includes(ext)) icon='ri-video-line'; else if (['mp3','wav'].includes(ext)) icon='ri-music-line';
+                else if (['txt','md','json'].includes(ext)) icon='ri-file-text-line'; else if (['js','py'].includes(ext)) icon='ri-code-line';
+                const fp = file.startsWith('http') ? file : 'fale/' + file;
+                return `<a href="${fp}" class="file-item" target="_blank" download><i class="${icon}"></i> ${fileName}</a>`;
+            }).join('')}</div>`;
+        }
+
+        function getAllTags(t) { const s = new Set(); t.forEach(x => (x.tags||[]).forEach(tag => s.add(tag))); return Array.from(s); }
+
+        function renderFilterBar(tags) {
+            if (!filterBar) return;
+            filterBar.innerHTML = tags.map(t => `<span class="filter-tag" data-tag="${t}">#${t}</span>`).join('') + '<span class="filter-reset" id="filterReset"><i class="ri-close-line"></i> Сбросить</span>';
+            filterBar.querySelectorAll('.filter-tag').forEach(el => {
+                el.addEventListener('click', function() {
+                    const tag = this.dataset.tag;
+                    if (activeFilter === tag) { activeFilter = null; filterBar.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active')); document.getElementById('filterReset').classList.remove('visible'); }
+                    else { activeFilter = tag; filterBar.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active')); this.classList.add('active'); document.getElementById('filterReset').classList.add('visible'); }
+                    renderTopics(allTopics);
+                });
+            });
+            document.getElementById('filterReset').addEventListener('click', () => { activeFilter = null; filterBar.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active')); document.getElementById('filterReset').classList.remove('visible'); renderTopics(allTopics); });
+        }
+
+        function renderTopics(topics) {
+            if (!topicsContainer) return;
+            const filtered = activeFilter ? topics.filter(t => (t.tags||[]).includes(activeFilter)) : topics;
+            if (!filtered.length) { topicsContainer.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-secondary);">Темы не найдены</div>'; return; }
+            topicsContainer.innerHTML = filtered.map(item => {
+                let mediaHTML = '';
+                if (item.video) {
+                    const vp = item.video.startsWith('http') ? item.video : 'video/' + item.video;
+                    if (vp.includes('youtube.com')||vp.includes('youtu.be')||vp.includes('vimeo.com')) mediaHTML = `<iframe class="topic-video" src="${vp}" allowfullscreen loading="lazy"></iframe>`;
+                    else mediaHTML = `<video class="topic-video" src="${vp}" controls playsinline preload="metadata"></video>`;
+                }
+                if (item.image && !item.video) {
+                    const ip = item.image.startsWith('http') ? item.image : 'img/' + item.image;
+                    mediaHTML = `<img class="topic-image" src="${ip}" alt="Image" loading="lazy" data-lightbox="${ip}" onerror="this.style.display='none'">`;
+                }
+                return `<article class="topic-card"><div class="topic-header"><div class="topic-avatar">${item.avatar||(item.author?item.author[0].toUpperCase():'?')}</div><div class="topic-user-info"><span class="topic-username">${item.author||'Аноним'}</span><span class="topic-meta"><span>${item.date||''}</span>${(item.tags||[]).map(t=>`<span class="topic-badge">#${t}</span>`).join('')}</span></div></div><div class="topic-body">${mediaHTML}${item.text?`<p class="topic-text">${item.text}</p>`:''}${renderFileAttachments(item.files)}</div></article>`;
+            }).join('');
+            topicsContainer.querySelectorAll('.topic-image').forEach(img => { img.addEventListener('click', function() { openLightbox(this.dataset.lightbox || this.src); }); });
+        }
+
+        async function loadTopics() {
+            try {
+                const r = await fetch('./post.txt');
+                if (!r.ok) throw new Error();
+                const t = await r.text();
+                const cleaned = t.replace(/\r\n/g,'\n');
+                const blocks = cleaned.split(/\n\}\s*\n/);
+                const objs = [];
+                blocks.forEach(b => {
+                    b = b.trim();
+                    if (!b) return;
+                    if (!b.endsWith('}')) b += '\n}';
+                    if (b.startsWith('{')) {
+                        try { objs.push(JSON.parse(b)); } catch(e) {}
+                    }
+                });
+                if (objs.length) allTopics = objs;
+                else {
+                    try { allTopics = JSON.parse('[' + t.replace(/\}\s*\{/g,'},{') + ']'); } catch(e) {}
+                }
+            } catch(e) {
+                allTopics = [];
+            }
+            renderFilterBar(getAllTags(allTopics));
+            renderTopics(allTopics);
+        }
+        loadTopics();
+
+        if (audio) { audio.currentTime = 0; audio.volume = 0.7; }
+        function updateFabIcon(p) { if (!fabIcon) return; fabIcon.className = p ? 'ri-play-fill' : 'ri-pause-fill'; if (!p) musicFab.classList.add('playing'); else musicFab.classList.remove('playing'); }
+        function togglePlay() { if (!audio) return; if (audio.paused) { audio.currentTime = 0; audio.play().then(() => { updateFabIcon(false); userInteracted = true; }).catch(() => {}); } else { audio.pause(); updateFabIcon(true); } }
+        audio.addEventListener('play', () => updateFabIcon(false)); audio.addEventListener('pause', () => updateFabIcon(true)); audio.addEventListener('ended', () => { updateFabIcon(true); audio.currentTime = 0; if (userInteracted) audio.play().catch(() => {}); });
+        if (musicFab) musicFab.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); }); updateFabIcon(true);
+        document.addEventListener('click', function initPlay(e) { if (audio && audio.paused && !userInteracted && e.target !== musicFab) { audio.currentTime = 0; audio.play().then(() => { updateFabIcon(false); userInteracted = true; }).catch(() => {}); } document.removeEventListener('click', initPlay); }, { once: true });
+
+        function toggleTheme() { isDark = !isDark; if (isDark) { document.body.classList.remove('light'); themeIcon.className = 'ri-sun-line'; } else { document.body.classList.add('light'); themeIcon.className = 'ri-moon-line'; } }
+        if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+
+        navTabs.forEach(tab => { tab.addEventListener('click', () => { navTabs.forEach(t => t.classList.remove('active')); tab.classList.add('active'); pages.forEach(p => p.classList.remove('active')); document.getElementById('page-' + tab.dataset.page)?.classList.add('active'); }); });
+
+        function createStar() { const s = document.createElement('div'); s.classList.add('star'); const sz = Math.random()*3+1.5; s.style.width=sz+'px'; s.style.height=sz+'px'; s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%'; s.style.animationDuration=(Math.random()*4+2)+'s'; s.style.animationDelay=Math.random()*3+'s'; starsContainer.appendChild(s); const g = document.createElement('div'); g.classList.add('star-glow'); g.style.width=(sz*2.5)+'px'; g.style.height=(sz*2.5)+'px'; g.style.left=s.style.left; g.style.top=s.style.top; g.style.animationDuration=s.style.animationDuration; g.style.animationDelay=s.style.animationDelay; starsContainer.appendChild(g); }
+        for (let i=0;i<60;i++) createStar();
+        setInterval(() => { if (starsContainer.querySelectorAll('.star').length < 60) createStar(); }, 3000);
+    })();
+    </script>
+</body>
+</html>
